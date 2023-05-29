@@ -1,58 +1,137 @@
-import React, { useState, useEffect } from 'react';
-import MapGL, { GeolocateControl, Marker, Popup } from 'react-map-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import React, { useEffect, useState } from "react";
+import Map, {Marker, Popup} from 'react-map-gl';
+import "mapbox-gl/dist/mapbox-gl.css";
+import db from './firebase'
 
-function MainMap() {
+const GeolocationExample = () => {
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [pinLocation, setPinLocation] = useState(null);
+  const [description, setDescription] = useState("");
+
   const [viewport, setViewport] = useState({
-    width: '100%',
-    height: '100%',
-    latitude: 0, // Initial latitude value
-    longitude: 0, // Initial longitude value
-    zoom: 13,
+    width: "100%",
+    height: "400px",
+    latitude: 0,
+    longitude: 0,
+    zoom: 12,
   });
-  
-  const [userLocation, setUserLocation] = useState(null);
-  const [selectedLocation, setSelectedLocation] = useState(null);
 
   useEffect(() => {
-    // Fetch user's location or use any other method to obtain it
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation({ latitude, longitude });
-        setViewport((prevState) => ({
-          ...prevState,
-          latitude,
-          longitude,
-        }));
-      },
-      (error) => {
-        console.error('Error getting user location:', error);
-      }
-    );
+    getLocation();
   }, []);
 
+  const getLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+      document.getElementById("demo").innerHTML =
+        "Geolocation is not supported by this browser.";
+    }
+  };
+
+  const showPosition = (position) => {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+    setCurrentLocation({ lat: latitude, lng: longitude });
+    document.getElementById("demo").innerHTML = `Latitude: ${latitude}<br>Longitude: ${longitude}`;
+    setViewport((prevViewport) => ({
+      ...prevViewport,
+      latitude,
+      longitude,
+    }));
+  };
+
+  const handlePinLocation = (event) => {
+    const { lngLat } = event;
+    const { lng, lat } = lngLat;
+    setPinLocation({ lat, lng });
+    setCurrentLocation({ lat, lng });
+  };
+  const handleSubmit = e => {
+    e.preventDefault();
+    
+    const data = {
+      latitude: pinLocation ? pinLocation.lat : currentLocation.lat,
+      longitude: pinLocation ? pinLocation.lng : currentLocation.lng,
+      description: description,
+    };
+  
+    db.collection("locations")
+      .add(data)
+      .then(() => {
+        console.log("Location data added successfully!");
+        // Reset form values
+        setDescription("");
+        setPinLocation(null);
+      })
+      .catch((error) => {
+        console.error("Error adding location data: ", error);
+      });
+  };
+  
+
   return (
-    <MapGL
-      {...viewport}
-      mapStyle="mapbox://styles/miki007/clgcabeu3001m01mmogi3u0wv"
-      mapboxApiAccessToken="pk.eyJ1IjoibWlraTAwNyIsImEiOiJjbGNxNHd2aGkwMmg1M29reWd2ZGJod2M1In0.f9-OPY7z8IFoBGwdM7zUZw"
-      onViewportChange={(viewport) => setViewport(viewport)}
-    >
-      {userLocation && (
-        <Marker
-          latitude={userLocation.latitude}
-          longitude={userLocation.longitude}
+    <div>
+      <h1>Geolocation Example</h1>
+      <p id="demo">Click the button to get your location.</p>
+      <button onClick={getLocation}>Get Location</button>
+      <div>
+        {pinLocation && (
+          <div align="left">
+            <h3>Pinned Location:</h3>
+            <p>Latitude: {pinLocation.lat}</p>
+            <p>Longitude: {pinLocation.lng}</p>
+          </div>
+        )}
+  
+        <Map
+          {...viewport}
+          onViewportChange={(newViewport) => setViewport(newViewport)}
+          onClick={handlePinLocation}
+          style={{ width: 1000, height: 800 }}
+          mapStyle="mapbox://styles/miki007/clgcabeu3001m01mmogi3u0wv"
+          mapboxAccessToken={process.env.mapbox_key}
         >
-          <p role="img" className="cursor-pointer text-2xl animate-bounce" aria-label="push-pin">
-            📌
-          </p>
-        </Marker>
-      )}
-
-      {/* Additional markers and other components */}
-    </MapGL>
+          {currentLocation && (
+            <Marker
+              latitude={currentLocation.lat}
+              longitude={currentLocation.lng}
+              offsetLeft={-20}
+              offsetTop={-10}
+            >
+              <div style={{ color: "blue", fontSize: "20px" }}>📌</div>
+            </Marker>
+          )}
+  
+          {pinLocation && (
+            <Marker
+              latitude={pinLocation.lat}
+              longitude={pinLocation.lng}
+              offsetLeft={-20}
+              offsetTop={-10}
+            >
+              <div style={{ color: "red", fontSize: "20px" }}>📌</div>
+            </Marker>
+          )}
+        </Map>
+      </div>
+  
+      <h2>Add Location</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="description">Description:</label>
+          <input
+            type="text"
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
   );
-}
+  
+};
 
-export default MainMap;
+export default GeolocationExample;
