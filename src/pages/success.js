@@ -15,7 +15,7 @@ function success() {
                 <div className='flex items-center space-x-2 mb-5'>
                     <CheckCircleIcon className='text-green-500 h-10' />
                     <h1 className='text-3xl'>
-                        Thank you, your loaction has been confirmed!
+                        Thank you, your location has been confirmed!
                     </h1>
                 </div>
                 <p>

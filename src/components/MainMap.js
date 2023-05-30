@@ -15,7 +15,7 @@ function about() {
       
       latitude: 0,
       longitude: 0,
-      zoom: 12,
+      zoom: 11,
     });
   
     useEffect(() => {
@@ -82,7 +82,8 @@ function about() {
         
             <Map
           {...viewport}
-          onViewportChange={(newViewport) => setViewport(newViewport)}
+        
+          onMove={evt => setViewport(evt.viewport)}
           onClick={handlePinLocation}
         
           mapStyle="mapbox://styles/miki007/clgcabeu3001m01mmogi3u0wv"
