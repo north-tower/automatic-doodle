@@ -18,9 +18,10 @@ function Header() {
     onClick={() => router.push('/')}
     src="https://i.postimg.cc/zf0SwbLq/IMG-20230429-WA0000.jpg"
     width={90}
-    height={14}
+    height={12}
     style={{objectFit:"contain"}}
     className="cursor-pointer rounded-full p-1"
+    alt="Logos"
 />
 
           </div>

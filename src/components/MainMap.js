@@ -2,11 +2,14 @@ import React, { useEffect, useState } from "react";
 import Map, {Marker, Popup} from 'react-map-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
 import db from './firebase'
+import { useRouter } from "next/router";
+
 
 function about() {
     const [currentLocation, setCurrentLocation] = useState(null);
     const [pinLocation, setPinLocation] = useState(null);
     const [description, setDescription] = useState("");
+    const router = useRouter(); 
   
     const [viewport, setViewport] = useState({
       
@@ -62,6 +65,7 @@ function about() {
           // Reset form values
           setDescription("");
           setPinLocation(null);
+          router.push("/success");
         })
         .catch((error) => {
           console.error("Error adding location data: ", error);
