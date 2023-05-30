@@ -3,92 +3,84 @@ import Map, {Marker, Popup} from 'react-map-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
 import db from './firebase'
 
-const GeolocationExample = () => {
-  const [currentLocation, setCurrentLocation] = useState(null);
-  const [pinLocation, setPinLocation] = useState(null);
-  const [description, setDescription] = useState("");
-
-  const [viewport, setViewport] = useState({
-    width: "100%",
-    height: "400px",
-    latitude: 0,
-    longitude: 0,
-    zoom: 12,
-  });
-
-  useEffect(() => {
-    getLocation();
-  }, []);
-
-  const getLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(showPosition);
-    } else {
-      document.getElementById("demo").innerHTML =
-        "Geolocation is not supported by this browser.";
-    }
-  };
-
-  const showPosition = (position) => {
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
-    setCurrentLocation({ lat: latitude, lng: longitude });
-    document.getElementById("demo").innerHTML = `Latitude: ${latitude}<br>Longitude: ${longitude}`;
-    setViewport((prevViewport) => ({
-      ...prevViewport,
-      latitude,
-      longitude,
-    }));
-  };
-
-  const handlePinLocation = (event) => {
-    const { lngLat } = event;
-    const { lng, lat } = lngLat;
-    setPinLocation({ lat, lng });
-    setCurrentLocation({ lat, lng });
-  };
-  const handleSubmit = e => {
-    e.preventDefault();
-    
-    const data = {
-      latitude: pinLocation ? pinLocation.lat : currentLocation.lat,
-      longitude: pinLocation ? pinLocation.lng : currentLocation.lng,
-      description: description,
+function about() {
+    const [currentLocation, setCurrentLocation] = useState(null);
+    const [pinLocation, setPinLocation] = useState(null);
+    const [description, setDescription] = useState("");
+  
+    const [viewport, setViewport] = useState({
+      
+      latitude: 0,
+      longitude: 0,
+      zoom: 12,
+    });
+  
+    useEffect(() => {
+      getLocation();
+    }, []);
+  
+    const getLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+      } else {
+        document.getElementById("demo").innerHTML =
+          "Geolocation is not supported by this browser.";
+      }
     };
   
-    db.collection("locations")
-      .add(data)
-      .then(() => {
-        console.log("Location data added successfully!");
-        // Reset form values
-        setDescription("");
-        setPinLocation(null);
-      })
-      .catch((error) => {
-        console.error("Error adding location data: ", error);
-      });
-  };
-  
+    const showPosition = (position) => {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      setCurrentLocation({ lat: latitude, lng: longitude });
 
+      setViewport((prevViewport) => ({
+        ...prevViewport,
+        latitude,
+        longitude,
+      }));
+    };
+  
+    const handlePinLocation = (event) => {
+      const { lngLat } = event;
+      const { lng, lat } = lngLat;
+      setPinLocation({ lat, lng });
+      setCurrentLocation({ lat, lng });
+    };
+    const handleSubmit = e => {
+      e.preventDefault();
+      
+      const data = {
+        latitude: pinLocation ? pinLocation.lat : currentLocation.lat,
+        longitude: pinLocation ? pinLocation.lng : currentLocation.lng,
+        description: description,
+      };
+    
+      db.collection("locations")
+        .add(data)
+        .then(() => {
+          console.log("Location data added successfully!");
+          // Reset form values
+          setDescription("");
+          setPinLocation(null);
+        })
+        .catch((error) => {
+          console.error("Error adding location data: ", error);
+        });
+        
+    };
+    
   return (
     <div>
-      <h1>Geolocation Example</h1>
-      <p id="demo">Click the button to get your location.</p>
-      <button onClick={getLocation}>Get Location</button>
-      <div>
-        {pinLocation && (
-          <div align="left">
-            <h3>Pinned Location:</h3>
-            <p>Latitude: {pinLocation.lat}</p>
-            <p>Longitude: {pinLocation.lng}</p>
-          </div>
-        )}
-  
-        <Map
+     
+
+      <main className='flex flex-col h-screen'>
+        <section className="flex-1">
+        
+            <Map
           {...viewport}
           onViewportChange={(newViewport) => setViewport(newViewport)}
           onClick={handlePinLocation}
-          style={{ width: 1000, height: 800 }}
+        
           mapStyle="mapbox://styles/miki007/clgcabeu3001m01mmogi3u0wv"
           mapboxAccessToken={process.env.mapbox_key}
         >
@@ -114,24 +106,28 @@ const GeolocationExample = () => {
             </Marker>
           )}
         </Map>
-      </div>
-  
-      <h2>Add Location</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="description">Description:</label>
-          <input
-            type="text"
-            id="description"
+          
+        </section>
+        <section className="flex-1 h-1/2 flex flex-wrap ">
+          <div className="max-w-md mx-auto text-center sm:w-1/2 px-4">
+      <h1 className="text-3xl font-bold mb-4">Submit Location</h1>
+      <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onClick={getLocation}>Get Current Location</button>
+          <form onSubmit={handleSubmit}>
+      <div className="mb-4 ">
+        <label htmlFor="name" className="block text-gray-700 font-bold mb-2">Description:</label>
+        <input type="text"  id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-        <button type="submit">Submit</button>
-      </form>
+             className="w-[350px] border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+      </div>
+      
+      <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Submit</button>
+    </form>
+          </div>
+        </section>
+      </main>
     </div>
-  );
-  
-};
+  )
+}
 
-export default GeolocationExample;
+export default about

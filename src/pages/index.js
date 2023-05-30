@@ -11,8 +11,8 @@ export default function Home({ products }) {
       
       <Header />
 
-      <main className='max-w-screen-2xl mx-auto'>
-        <MainMap />
+      <main className='flex-1'>
+        <MainMap className="w-full h-1/2" />
       </main>
     </div>
   )
